@@ -1,0 +1,55 @@
+### config predis ###
+- add below to docker-compose.yml and $docker-compose up -d
+===========================
+  redis_name:
+    image: redis:3-alpine
+    container_name: redis_name
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./docker/redis:/data
+    environment:
+      - TERM=xterm-256color
+      - TZ=Asia/Bangkok
+    entrypoint: redis-server --appendonly yes --protected-mode no
+===========================
+$docker exec -it CONTAINER_ID bash  // go in container and go to laravel folder
+
+$composer require predis/predis  // for download redis
+- go .env file and edit below
+===========================
+BROADCAST_DRIVER=log
+CACHE_DRIVER=redis
+SESSION_DRIVER=file
+QUEUE_DRIVER=sync
+
+REDIS_HOST=172.18.0.5 // get by command $docker inspect CONTAINER_REDIS_ID   //and see IPADDRESS 
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+===========================
+
+- to go in redis container  use command
+$docker exec CONTAINER_REDIS_ID redis-client
+- to get all key use this command in redis container
+$keys *
+- to get value of key use commamd
+$get KEY_NAME
+
+### TO use redis in Laravel###
+
+- in web.php (route)
+
+==========================
+use Illuminate\Support\Facades\Redis;
+
+Route::get('/', function () {
+
+	$visits = Redis::incr('visits');	
+    	return view('welcome')->with('visits', $visits);
+});
+==========================
+output : when refesh page welcome a $visits will increase number everytime 
+can check by this command in redis container
+$get visits 
+
+
+
